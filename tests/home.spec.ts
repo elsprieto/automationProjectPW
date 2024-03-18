@@ -1,31 +1,34 @@
 import { test, expect } from '@playwright/test';
+import { ButtonOptions } from '../pages/cookies.page';
+import { CookiesPage } from '../pages/cookies.page';
+import { HomePage } from '../pages/google.home.page';
 
-test.beforeEach(async ({page}) => {
-  await page.goto('https://www.google.com/');
-  await page.getByRole('button', {name: 'Rechazar todo'}).click();
+test.beforeEach(async ({ page }) => {
+  let cookiesPage = new CookiesPage(page);
+  await page.goto('');
+  await cookiesPage.selectOpionfromCookiesPage('Rechazar todo');
   await expect(page).toHaveTitle(/Google/);
 });
 
 test.describe('Validate the Search option', () => {
-  test('validate searching result about automation in wikipedia page [ @functional , @smoke ]', async ({ page }) => {
+  test.describe('Accepting the cookies option', () => {
+    test('validate searching result about automation in wikipedia page with page Object Model [ @regression , @functional , @home ]', async ({ page }) => {
       // Expect a title "to contain" a substring.
-      await page.locator('form textarea').fill('automatizacion');
-      await page.getByText('automatizacion', { exact: true }).click();
-      await expect(page.getByRole('link', { name: 'Automatización - Wikipedia,' })).toContainText('https://es.wikipedia.org › wiki › Automatización');
-      await page.locator('h3', {hasText: 'Automatización - Wikipedia'}).click();
-      await page.locator('#mw-content-text p', { hasText: 'Oliver Evans'}).scrollIntoViewIfNeeded();
-      await expect(page.locator('#mw-content-text p', { hasText: 'Oliver Evans'})).toContainText('en 1785, convirtiéndose en el primer proceso industrial completamente automatizado.');
+      let homePage = new HomePage(page)
+      await homePage.searchWord('automatizacion');
+      await homePage.validateTheSearchResultInWikipedia('Automatización - Wikipedia,','https://es.wikipedia.org › wiki › Automatización');
+      await homePage.selectWikipediaResult('Automatización - Wikipedia');
+      await homePage.validateResultInWikipediaPage('Oliver Evans' ,'en 1785, convirtiéndose en el primer proceso industrial completamente automatizado.');
+    });
 
-  });
-  
-  test('get started link', async ({ page }) => {
-    await page.goto('https://playwright.dev/');
-  
-    // Click the get started link.
-    await page.getByRole('link', { name: 'Get started' }).click();
-  
-    // Expects page to have a heading with the name of Installation.
-    await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+    test('validate searching result about automation in wikipedia page with assert visual [ @regression , @visual , @home ]', async ({ page }) => {
+      // Expect a title "to contain" a substring.
+      let homePage = new HomePage(page)
+      await homePage.searchWord('automatizacion');
+      await homePage.validateTheSearchResultInWikipediaAutomation();
+      await homePage.selectWikipediaResult('Automatización - Wikipedia');
+      await homePage.validateResultFirstAutomatatedProcess('Oliver Evans');
+    });
   });
 });
 
